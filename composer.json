@@ -1,0 +1,19 @@
+{
+    "name": "inferno-code/emailauth-php",
+    "description": "Interfaces for secure authentication on websites using email.",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Andrey Zbitnev"
+        }
+    ],
+    "require": {
+        "php": ">=7.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "EmailAuth\\": "src/EmailAuth/"
+        }
+    }
+}
