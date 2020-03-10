@@ -5,6 +5,7 @@ namespace EmailAuth;
 use \EmailAuth\User;
 use \EmailAuth\Invite;
 use \EmailAuth\RecoveryRequest;
+use \EmailAuth\ChangeEmailRequest;
 
 /**
  * Describe the interface which provides all features and utilities for secure authentication of individual users.
@@ -21,6 +22,7 @@ interface AuthInterface {
      *
      * @throws \EmailAuth\Exceptions\UserAlreadyExistsException If an email is already registered in storage.
      * @throws \EmailAuth\Exceptions\UserLockedException If inviter's account is locked.
+     * @throws \EmailAuth\Exceptions\TooManyRequestsException If the number of allowed attempts/requests has been exceeded.
      * @throws \EmailAuth\Exceptions\IOException If storage is not accessible.
      */
     public function getInvite(string $email, User $inviter = null): Invite;
@@ -32,17 +34,21 @@ interface AuthInterface {
      * @param array $profile The user's profile data (such as name, birthday, gender etc).
      * @param string $password The user's password.
      *
+     * @return \EmailAuth\User An instance of new user's account.
+     *
      * @throws \EmailAuth\Exceptions\UserAlreadyExistsException If an email from invite is already registered in storage.
      * @throws \EmailAuth\Exceptions\UserLockedException If inviter's account is locked.
      * @throws \EmailAuth\Exceptions\IOException If storage is not accessible.
      */
-    public function registerUser(Invite $invite, array $profile, string $password): void;
+    public function registerUser(Invite $invite, array $profile, string $password): User;
 
     /**
      * Attempts to sign in a user with their email address and password.
      *
      * @param string $email The user's email address.
      * @param string $password The user's password.
+     *
+     * @return \EmailAuth\User An instance of user's account.
      *
      * @throws \EmailAuth\Exceptions\UserNotFoundException If an email is not registered in storage.
      * @throws \EmailAuth\Exceptions\UserLockedException If users's account is locked.
@@ -144,7 +150,7 @@ interface AuthInterface {
      *
      * @param \EmailAuth\User $user User's account.
      *
-     * @return \EmailAuth\User|null Inviter's account (id exists).
+     * @return \EmailAuth\User|null Inviter's account or null if inviter is not exists.
      *
      * @throws \EmailAuth\Exceptions\UserNotFoundException If the user is not found in storage.
      * @throws \EmailAuth\Exceptions\UserLockedException If users's account is locked.

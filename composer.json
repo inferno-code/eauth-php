@@ -15,5 +15,8 @@
         "psr-4": {
             "EmailAuth\\": "src/EmailAuth/"
         }
+    },
+    "require-dev": {
+        "doctrine/dbal": "^2.10"
     }
 }
