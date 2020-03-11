@@ -36,6 +36,24 @@ $conn->query("set client_encoding = 'utf-8'");
 /*
 var_dump($conn->fetchColumn('select now()'));
 */
+/*
+var_dump($conn->transactional(function ($conn) {
+	$dt = $conn->fetchColumn('select now()');
+	return [ 'currentDateAndTime' => $dt ];
+}));
+*/
+/*
+$queryBuilder = $conn->createQueryBuilder();
+$queryBuilder
+	->select('*')
+	->from('auth.users')
+	->where(
+		$queryBuilder->expr()->andX(
+			$queryBuilder->expr()->eq('username', ':userID')
+		)
+	);
+var_dump($queryBuilder->getSQL());exit;
+*/
 
 $auth = new Auth($conn, new BasicTokenGenerator());
 
@@ -58,7 +76,7 @@ try {
 try {
 	$invite = $auth->getInviteByToken('aa3bf5dfbbb5dd0bca55cd08f4600a0d');
 	$profile = [
-		'name' => 'John Conor',
+		'name' => 'John Connor',
 		'gender' => 'male',
 	];
 	$password = 'test';
@@ -135,7 +153,7 @@ try {
 try {
 	$user = $auth->getUserByEmail('test@test');
     $user = $auth->changeProfile($user, [
-		'name' => 'John Conor',
+		'name' => 'John Connor',
 		'gender' => 'male',
         'birthday' => '1985-02-28'
     ]);
@@ -172,7 +190,7 @@ try {
 
 /*
 try {
-    $recoveryRequest = $auth->getRecoveryRequestByToken('901a2373fc644330935f1e40952422bb');
+    $recoveryRequest = $auth->getRecoveryRequestByToken('372a004464335233d4a1d01c49d97b6c');
     $user = $auth->recovery($recoveryRequest, 'test');
 	var_dump($user);
 } catch (RequestExpiredException $ex) {
@@ -197,7 +215,7 @@ try {
 /*
 try {
 	$user = $auth->getUserByEmail('test@test');
-    $changeEmailRequest = $auth->getChangeEmailRequest($user, 'john@conor.gov');
+    $changeEmailRequest = $auth->getChangeEmailRequest($user, 'john@connor.gov');
 	var_dump($changeEmailRequest);
 } catch (UserNotFoundException $ex) {
 	print "User is not found\n";
@@ -216,7 +234,7 @@ try {
 
 /*
 try {
-    $changeEmailRequest = $auth->getChangeEmailRequestByToken('3ca537b1ecf28b96abf030c63c09fb2e');
+    $changeEmailRequest = $auth->getChangeEmailRequestByToken('51df5c903a332dab7743a4f7b12ff17d');
     $user = $auth->changeEmail($changeEmailRequest);
 	var_dump($user);
 } catch (RequestExpiredException $ex) {
@@ -242,8 +260,8 @@ try {
 
 /*
 try {
-    $user = $auth->getUserByEmail('john@conor.gov');
-	$invite = $auth->getInvite('sarah@conor.gov', $user);
+    $user = $auth->getUserByEmail('john@connor.gov');
+	$invite = $auth->getInvite('sarah@connor.gov', $user);
 	var_dump($invite);
 } catch (UserAlreadyExistsException $ex) {
 	print "User already exists\n";
@@ -262,7 +280,7 @@ try {
 try {
 	$invite = $auth->getInviteByToken('80ec62d5c750865ffb111daf1e6effe7');
 	$profile = [
-		'name' => 'Sarah Conor',
+		'name' => 'Sarah Connor',
 		'gender' => 'female',
 	];
 	$password = 'test';
@@ -289,10 +307,10 @@ try {
 
 /*
 try {
-    $user = $auth->getUserByEmail('sarah@conor.gov');
+    $user = $auth->getUserByEmail('sarah@connor.gov');
     $inviter = $auth->getInviter($user);
 	var_dump($inviter);
-    $user = $auth->getUserByEmail('john@conor.gov');
+    $user = $auth->getUserByEmail('john@connor.gov');
     $inviter = $auth->getInviter($user);
 	var_dump($inviter);
 } catch (UserNotFoundException $ex) {
@@ -306,7 +324,7 @@ try {
 
 /*
 try {
-    $user = $auth->getUserByEmail('john@conor.gov');
+    $user = $auth->getUserByEmail('john@connor.gov');
     $invites = $auth->getInvites($user);
 	var_dump($invites);
 } catch (UserNotFoundException $ex) {
@@ -318,8 +336,9 @@ try {
 }
 */
 
+/*
 try {
-    $user = $auth->getUserByEmail('john@conor.gov');
+    $user = $auth->getUserByEmail('john@connor.gov');
     $invitedUsers = $auth->getInvitedUsers($user);
 	var_dump($invitedUsers);
 } catch (UserNotFoundException $ex) {
@@ -329,3 +348,6 @@ try {
 } catch (Exception $ex) {
 	print "Unexpacted error\n";
 }
+*/
+
+// ----------------------------------------------------
