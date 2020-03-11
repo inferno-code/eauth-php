@@ -4,10 +4,14 @@ namespace EmailAuth;
 
 use \DateTime;
 
+use function openssl_random_pseudo_bytes;
+
 /**
  * Describe the class which provides all features for user's account.
  */
 class User {
+
+    const SALT_LENGTH = 16;
 
     private $id;
     private $email;
@@ -20,13 +24,16 @@ class User {
      *
      * @param mixed $id The user's unique ID.
      * @param string $email The user's email address.
+     * @param string $password The user's password.
      * @param array $profile The user's profile data (such as name, birthday, gender etc).
      * @param bool $locked The user's locking flag.
      * @param string $created Date and time of creation of account.
      */
-    public function __construct($id, string $email, array $profile, bool $locked, string $created) {
+    public function __construct($id, string $email, string $password, array $profile, bool $locked, string $created) {
         $this->id = $id;
         $this->email = $email;
+        $this->passwordSalt = openssl_random_pseudo_bytes(self::SALT_LENGTH);
+        $this->passwordHash = $this->createPasswordHash($password);
         $this->profile = $profile;
         $this->locked = $locked;
         $this->created = new DateTime($created);
@@ -75,5 +82,23 @@ class User {
      */
     public function getCreated(): DateTime {
         return $this->created;
+    }
+
+    /**
+     * Testing the given password for matching.
+     *
+     * @return bool True if the given password is match with user's password, false otherwise.
+     */
+    public function isPasswordMatch(string $password): bool {
+        return $this->passwordHash === $this->createPasswordHash($password);
+    }
+
+    /**
+     * Hash the given password.
+     *
+     * @return string Hash of password.
+     */
+    private function createPasswordHash(string $password): string {
+        return md5("{$this->passwordSalt}{$password}");
     }
 }

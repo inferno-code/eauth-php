@@ -39,6 +39,8 @@ interface AuthInterface {
      * @throws \EmailAuth\Exceptions\UserAlreadyExistsException If an email from invite is already registered in storage.
      * @throws \EmailAuth\Exceptions\UserLockedException If inviter's account is locked.
      * @throws \EmailAuth\Exceptions\IOException If storage is not accessible.
+     * @throws \EmailAuth\Exceptions\RequestExpiredException If invite is expired.
+     * @throws \EmailAuth\Exceptions\RequestActivatedException If invite is already activated.
      */
     public function registerUser(Invite $invite, array $profile, string $password): User;
 
@@ -116,6 +118,8 @@ interface AuthInterface {
      * @throws \EmailAuth\Exceptions\UserNotFoundException If an email from request is not found in storage.
      * @throws \EmailAuth\Exceptions\UserLockedException If users's account is locked.
      * @throws \EmailAuth\Exceptions\IOException If storage is not accessible.
+     * @throws \EmailAuth\Exceptions\RequestExpiredException If invite is expired.
+     * @throws \EmailAuth\Exceptions\RequestActivatedException If invite is already activated.
      */
     public function recovery(RecoveryRequest $recoveryRequest, string $newPassword): User;
 

@@ -15,6 +15,8 @@ use \EmailAuth\Exceptions\UserAlreadyExistsException;
 use \EmailAuth\Exceptions\UserLockedException;
 use \EmailAuth\Exceptions\UserNotFoundException;
 use \EmailAuth\Exceptions\TokenNotFoundException;
+use \EmailAuth\Exceptions\RequestExpiredException;
+use \EmailAuth\Exceptions\RequestActivatedException;
 use \EmailAuth\TokenGeneratorInterface;
 use \EmailAuth\BasicTokenGenerator;
 use \Doctrine\DBAL\Connection;
@@ -39,7 +41,7 @@ $auth = new Auth($conn, new BasicTokenGenerator());
 
 /*
 try {
-	$invite = $auth->getInvite('test@test'); // TODO test with inviter
+	$invite = $auth->getInvite('test@test');
 	var_dump($invite);
 } catch (UserAlreadyExistsException $ex) {
 	print "User already exists\n";
@@ -54,7 +56,7 @@ try {
 
 /*
 try {
-	$invite = $auth->getInviteByToken('bebb34a4edb602d2ddd73b3da2a3437c');
+	$invite = $auth->getInviteByToken('aa3bf5dfbbb5dd0bca55cd08f4600a0d');
 	$profile = [
 		'name' => 'John Conor',
 		'gender' => 'male',
@@ -64,6 +66,10 @@ try {
 	var_dump($user);
 } catch (TokenNotFoundException $ex) {
 	print "Token not found\n";
+} catch (RequestExpiredException $ex) {
+	print "Request is expired\n";
+} catch (RequestActivatedException $ex) {
+	print "Request is already activated\n";
 } catch (UserNotFoundException $ex) {
 	print "User not found\n";
 } catch (UserAlreadyExistsException $ex) {
@@ -89,3 +95,237 @@ try {
 	print "Unexpacted error\n";
 }
 */
+
+/*
+try {
+	$user = $auth->login('test@test', 'test');
+	var_dump($user);
+} catch (UserNotFoundException $ex) {
+	print "User is not found\n";
+} catch (PasswordNotMatchException $ex) {
+	print "Password is not match\n";
+} catch (UserLockedException $ex) {
+	print "User is locked\n";
+} catch (IOException $ex) {
+	print "Storage is not available now\n";
+} catch (Exception $ex) {
+	print "Unexpacted error: " . $ex->getMessage() . "\n";
+}
+*/
+
+/*
+try {
+	$user = $auth->getUserByEmail('test@test');
+    $user = $auth->changePassword($user, 'test', 'test1');
+	var_dump($user);
+} catch (UserNotFoundException $ex) {
+	print "User is not found\n";
+} catch (PasswordNotMatchException $ex) {
+	print "Password is not match\n";
+} catch (UserLockedException $ex) {
+	print "User is locked\n";
+} catch (IOException $ex) {
+	print "Storage is not available now\n";
+} catch (Exception $ex) {
+	print "Unexpacted error: " . $ex->getMessage() . "\n";
+}
+*/
+
+/*
+try {
+	$user = $auth->getUserByEmail('test@test');
+    $user = $auth->changeProfile($user, [
+		'name' => 'John Conor',
+		'gender' => 'male',
+        'birthday' => '1985-02-28'
+    ]);
+	var_dump($user);
+} catch (UserNotFoundException $ex) {
+	print "User is not found\n";
+} catch (PasswordNotMatchException $ex) {
+	print "Password is not match\n";
+} catch (UserLockedException $ex) {
+	print "User is locked\n";
+} catch (IOException $ex) {
+	print "Storage is not available now\n";
+} catch (Exception $ex) {
+	print "Unexpacted error: " . $ex->getMessage() . "\n";
+}
+*/
+
+/*
+try {
+    $recoveryRequest = $auth->getRecoveryRequest('test@test');
+	var_dump($recoveryRequest);
+} catch (UserNotFoundException $ex) {
+	print "User is not found\n";
+} catch (UserLockedException $ex) {
+	print "User is locked\n";
+} catch (TooManyRequestsException $ex) {
+	print "Too many requests\n";
+} catch (IOException $ex) {
+	print "Storage is not available now\n";
+} catch (Exception $ex) {
+	print "Unexpacted error: " . $ex->getMessage() . "\n";
+}
+*/
+
+/*
+try {
+    $recoveryRequest = $auth->getRecoveryRequestByToken('901a2373fc644330935f1e40952422bb');
+    $user = $auth->recovery($recoveryRequest, 'test');
+	var_dump($user);
+} catch (RequestExpiredException $ex) {
+	print "Request is expired\n";
+} catch (RequestActivatedException $ex) {
+	print "Request is already activated\n";
+} catch (UserNotFoundException $ex) {
+	print "User is not found\n";
+} catch (TooManyRequestsException $ex) {
+	print "Too many requests\n";
+} catch (PasswordNotMatchException $ex) {
+	print "Password is not match\n";
+} catch (UserLockedException $ex) {
+	print "User is locked\n";
+} catch (IOException $ex) {
+	print "Storage is not available now\n";
+} catch (Exception $ex) {
+	print "Unexpacted error: " . $ex->getMessage() . "\n";
+}
+*/
+
+/*
+try {
+	$user = $auth->getUserByEmail('test@test');
+    $changeEmailRequest = $auth->getChangeEmailRequest($user, 'john@conor.gov');
+	var_dump($changeEmailRequest);
+} catch (UserNotFoundException $ex) {
+	print "User is not found\n";
+} catch (UserAlreadyExistsException $ex) {
+	print "User is already exists\n";
+} catch (UserLockedException $ex) {
+	print "User is locked\n";
+} catch (TooManyRequestsException $ex) {
+	print "Too many requests\n";
+} catch (IOException $ex) {
+	print "Storage is not available now\n";
+} catch (Exception $ex) {
+	print "Unexpacted error: " . $ex->getMessage() . "\n";
+}
+*/
+
+/*
+try {
+    $changeEmailRequest = $auth->getChangeEmailRequestByToken('3ca537b1ecf28b96abf030c63c09fb2e');
+    $user = $auth->changeEmail($changeEmailRequest);
+	var_dump($user);
+} catch (RequestExpiredException $ex) {
+	print "Request is expired\n";
+} catch (RequestActivatedException $ex) {
+	print "Request is already activated\n";
+} catch (UserNotFoundException $ex) {
+	print "User is not found\n";
+} catch (UserAlreadyExistsException $ex) {
+	print "User is already exists\n";
+} catch (TooManyRequestsException $ex) {
+	print "Too many requests\n";
+} catch (PasswordNotMatchException $ex) {
+	print "Password is not match\n";
+} catch (UserLockedException $ex) {
+	print "User is locked\n";
+} catch (IOException $ex) {
+	print "Storage is not available now\n";
+} catch (Exception $ex) {
+	print "Unexpacted error: " . $ex->getMessage() . "\n";
+}
+*/
+
+/*
+try {
+    $user = $auth->getUserByEmail('john@conor.gov');
+	$invite = $auth->getInvite('sarah@conor.gov', $user);
+	var_dump($invite);
+} catch (UserAlreadyExistsException $ex) {
+	print "User already exists\n";
+} catch (TooManyRequestsException $ex) {
+	print "Too many requests\n";
+} catch (UserLockedException $ex) {
+	print "Inviter is locked\n";
+} catch (IOException $ex) {
+	print "Storage is not available now\n" . $ex->getMessage();
+} catch (Exception $ex) {
+	print "Unexpacted error\n";
+}
+*/
+
+/*
+try {
+	$invite = $auth->getInviteByToken('80ec62d5c750865ffb111daf1e6effe7');
+	$profile = [
+		'name' => 'Sarah Conor',
+		'gender' => 'female',
+	];
+	$password = 'test';
+	$user = $auth->registerUser($invite, $profile, $password);
+	var_dump($user);
+} catch (TokenNotFoundException $ex) {
+	print "Token not found\n";
+} catch (RequestExpiredException $ex) {
+	print "Request is expired\n";
+} catch (RequestActivatedException $ex) {
+	print "Request is already activated\n";
+} catch (UserNotFoundException $ex) {
+	print "User not found\n";
+} catch (UserAlreadyExistsException $ex) {
+	print "User already exists\n";
+} catch (UserLockedException $ex) {
+	print "Inviter is locked\n";
+} catch (IOException $ex) {
+	print "Storage is not available now\n" . $ex->getMessage();
+} catch (Exception $ex) {
+	print "Unexpacted error\n";
+}
+*/
+
+/*
+try {
+    $user = $auth->getUserByEmail('sarah@conor.gov');
+    $inviter = $auth->getInviter($user);
+	var_dump($inviter);
+    $user = $auth->getUserByEmail('john@conor.gov');
+    $inviter = $auth->getInviter($user);
+	var_dump($inviter);
+} catch (UserNotFoundException $ex) {
+	print "User not found\n";
+} catch (IOException $ex) {
+	print "Storage is not available now\n" . $ex->getMessage();
+} catch (Exception $ex) {
+	print "Unexpacted error\n";
+}
+*/
+
+/*
+try {
+    $user = $auth->getUserByEmail('john@conor.gov');
+    $invites = $auth->getInvites($user);
+	var_dump($invites);
+} catch (UserNotFoundException $ex) {
+	print "User not found\n";
+} catch (IOException $ex) {
+	print "Storage is not available now\n" . $ex->getMessage();
+} catch (Exception $ex) {
+	print "Unexpacted error\n";
+}
+*/
+
+try {
+    $user = $auth->getUserByEmail('john@conor.gov');
+    $invitedUsers = $auth->getInvitedUsers($user);
+	var_dump($invitedUsers);
+} catch (UserNotFoundException $ex) {
+	print "User not found\n";
+} catch (IOException $ex) {
+	print "Storage is not available now\n" . $ex->getMessage();
+} catch (Exception $ex) {
+	print "Unexpacted error\n";
+}

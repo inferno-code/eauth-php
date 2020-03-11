@@ -32,7 +32,7 @@ class Invite extends BasicRequest {
     /**
      * Get inviter's account.
      *
-     * @return \EmailAuth\User The inviter's account (if exists).
+     * @return \EmailAuth\User The inviter's account or null if inviter is not exists.
      */
     public function getInviter(): ?User {
         return $this->inviter;

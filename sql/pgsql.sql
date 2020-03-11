@@ -10,7 +10,7 @@ CREATE TABLE IF NOT EXISTS auth.users (
   password text NOT NULL,
   profile json NOT NULL,
   created timestamp with time zone NOT NULL DEFAULT now(),
-  locked boolean NOT NULL DEFAULT true,
+  locked boolean NOT NULL DEFAULT false,
   invite_id bigint not null,
   CONSTRAINT users_pkey PRIMARY KEY (id)
 );
