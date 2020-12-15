@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 
-namespace EmailAuth\Exceptions;
+namespace EAuth\Exceptions;
 
 use \Exception;
 

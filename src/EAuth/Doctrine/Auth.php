@@ -1,23 +1,23 @@
 <?php declare(strict_types = 1);
 
-namespace EmailAuth\Doctrine;
+namespace EAuth\Doctrine;
 
-use \EmailAuth\AuthInterface;
-use \EmailAuth\User;
-use \EmailAuth\Invite;
-use \EmailAuth\RecoveryRequest;
-use \EmailAuth\ChangeEmailRequest;
-use \EmailAuth\Exceptions\IOException;
-use \EmailAuth\Exceptions\PasswordNotMatchException;
-use \EmailAuth\Exceptions\TooManyRequestsException;
-use \EmailAuth\Exceptions\UserAlreadyExistsException;
-use \EmailAuth\Exceptions\UserLockedException;
-use \EmailAuth\Exceptions\UserNotFoundException;
-use \EmailAuth\Exceptions\TokenNotFoundException;
-use \EmailAuth\Exceptions\RequestExpiredException;
-use \EmailAuth\Exceptions\RequestActivatedException;
-use \EmailAuth\TokenGeneratorInterface;
-use \EmailAuth\BasicTokenGenerator;
+use \EAuth\AuthInterface;
+use \EAuth\User;
+use \EAuth\Invite;
+use \EAuth\RecoveryRequest;
+use \EAuth\ChangeEmailRequest;
+use \EAuth\Exceptions\IOException;
+use \EAuth\Exceptions\PasswordNotMatchException;
+use \EAuth\Exceptions\TooManyRequestsException;
+use \EAuth\Exceptions\UserAlreadyExistsException;
+use \EAuth\Exceptions\UserLockedException;
+use \EAuth\Exceptions\UserNotFoundException;
+use \EAuth\Exceptions\TokenNotFoundException;
+use \EAuth\Exceptions\RequestExpiredException;
+use \EAuth\Exceptions\RequestActivatedException;
+use \EAuth\TokenGeneratorInterface;
+use \EAuth\BasicTokenGenerator;
 use \Doctrine\DBAL\Connection;
 use \Exception;
 

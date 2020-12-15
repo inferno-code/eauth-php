@@ -1,8 +1,8 @@
 <?php declare(strict_types = 1);
 
-namespace EmailAuth;
+namespace EAuth;
 
-use \EmailAuth\TokenGeneratorInterface;
+use \EAuth\TokenGeneratorInterface;
 
 use \InvalidArgumentException;
 

@@ -1,6 +1,6 @@
 <?php declare(strict_types = 1);
 
-namespace EmailAuth;
+namespace EAuth;
 
 /**
  * Describe the interface for token generation and validation.

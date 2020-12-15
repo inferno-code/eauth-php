@@ -1,3 +1,5 @@
-# emailauth-php
+EAuth
+=====
 
-Interfaces for secure authentication on websites using email.
+Implementation of secure authentication on websites using an email.
+

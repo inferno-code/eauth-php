@@ -1,19 +1,25 @@
 {
-    "name": "inferno-code/emailauth-php",
-    "description": "Interfaces for secure authentication on websites using email.",
+    "name": "inferno-code/eauth",
+    "description": "Implementation of secure authentication on websites using an email.",
     "type": "library",
     "license": "MIT",
     "authors": [
         {
-            "name": "Andrey Zbitnev"
+            "name": "inferno-code"
         }
+	],
+	"repositories": [
+		{
+			"type": "vcs",
+			"url": "https://github.com/inferno-code/eauth-php"
+		}
     ],
     "require": {
         "php": ">=7.2"
     },
     "autoload": {
         "psr-4": {
-            "EmailAuth\\": "src/EmailAuth/"
+            "EAuth\\": "src/EAuth/"
         }
     },
     "require-dev": {
