@@ -1,12 +1,12 @@
 <?php declare(strict_types = 1);
 
-namespace EAuth\Doctrine;
+namespace EAuth;
 
-use \EAuth\AuthInterface;
+use \EAuth\IEAuth;
 use \EAuth\User;
 use \EAuth\Invite;
-use \EAuth\RecoveryRequest;
-use \EAuth\ChangeEmailRequest;
+use \EAuth\RequestToRecoveryAccess;
+use \EAuth\RequestToChangeEmail;
 use \EAuth\Exceptions\IOException;
 use \EAuth\Exceptions\PasswordNotMatchException;
 use \EAuth\Exceptions\TooManyRequestsException;
@@ -16,7 +16,7 @@ use \EAuth\Exceptions\UserNotFoundException;
 use \EAuth\Exceptions\TokenNotFoundException;
 use \EAuth\Exceptions\RequestExpiredException;
 use \EAuth\Exceptions\RequestActivatedException;
-use \EAuth\TokenGeneratorInterface;
+use \EAuth\ITokenGenerator;
 use \EAuth\BasicTokenGenerator;
 use \Doctrine\DBAL\Connection;
 use \Exception;
@@ -29,7 +29,7 @@ use function trim;
 /**
  *
  */
-class Auth implements AuthInterface {
+class EAuthPostgres implements IEAuth {
 
 	private $connection;
 	private $tokenGen;
@@ -38,7 +38,7 @@ class Auth implements AuthInterface {
 	/**
 	 *
 	 */
-	public function __construct(Connection $connection, TokenGeneratorInterface $tokenGen, array $limits = []) {
+	public function __construct(Connection $connection, ITokenGenerator $tokenGen, array $limits = []) {
 
 		$this->connection = $connection;
 		$this->tokenGen = $tokenGen;
@@ -76,7 +76,7 @@ class Auth implements AuthInterface {
 
 				$numAttempts = $this->connection->fetchColumn(
 					'
-					select count(*) from auth.invites where email = :email and now() < expired and activated is null
+					select count(*) from eauth.invites where email = :email and now() < expired and activated is null
 					',
 					[
 						'email' => $email,
@@ -91,7 +91,7 @@ class Auth implements AuthInterface {
 					$token = $this->tokenGen->generateToken();
 					$id = $this->connection->fetchColumn(
 						'
-						select id from auth.invites where token = :token limit 1
+						select id from eauth.invites where token = :token limit 1
 						',
 						[
 							'token' => $token
@@ -104,7 +104,7 @@ class Auth implements AuthInterface {
 
 				$this->connection->executeQuery(
 					'
-					insert into auth.invites (token, email, inviter_user_id)
+					insert into eauth.invites (token, email, inviter_user_id)
 						values (:token, :email, :inviterID)
 					',
 					[
@@ -160,7 +160,7 @@ class Auth implements AuthInterface {
 
 				$this->connection->executeQuery(
 					'
-					insert into auth.users (email, invite_id, profile, password)
+					insert into eauth.users (email, invite_id, profile, password)
 						values (:email, :inviteID, :profile, :password)
 					',
 					[
@@ -173,7 +173,7 @@ class Auth implements AuthInterface {
 
 				$this->connection->executeQuery(
 					'
-					update auth.invites set activated = now() where id = :id
+					update eauth.invites set activated = now() where id = :id
 					',
 					[
 						'id' => $invite->getID(),
@@ -227,7 +227,7 @@ class Auth implements AuthInterface {
 
 			$this->connection->executeQuery(
 				'
-				update auth.users set password = :newPassword where id = :id
+				update eauth.users set password = :newPassword where id = :id
 				',
 				[
 					'newPassword' => $newPassword,
@@ -256,7 +256,7 @@ class Auth implements AuthInterface {
 
 			$this->connection->executeQuery(
 				'
-				update auth.users set profile = :newProfile where id = :id
+				update eauth.users set profile = :newProfile where id = :id
 				',
 				[
 					'newProfile' => json_encode($newProfile),
@@ -275,7 +275,7 @@ class Auth implements AuthInterface {
 	/**
 	 * {@inheritdoc}
 	 */
-	public function getRecoveryRequest(string $email): RecoveryRequest {
+	public function getRequestToRecoveryAccess(string $email): RequestToRecoveryAccess {
 
 		$user = $this->getUserByEmail($email);
 
@@ -289,7 +289,7 @@ class Auth implements AuthInterface {
 
 				$numAttempts = $this->connection->fetchColumn(
 					'
-					select count(*) from auth.recovery_requests where user_id = :userID and now() < expired and activated is null
+					select count(*) from eauth.requests_to_recovery_access where user_id = :userID and now() < expired and activated is null
 					',
 					[
 						'userID' => $user->getID()
@@ -304,7 +304,7 @@ class Auth implements AuthInterface {
 					$token = $this->tokenGen->generateToken();
 					$id = $this->connection->fetchColumn(
 						'
-						select id from auth.recovery_requests where token = :token limit 1
+						select id from eauth.requests_to_recovery_access where token = :token limit 1
 						',
 						[
 							'token' => $token
@@ -317,7 +317,7 @@ class Auth implements AuthInterface {
 
 				$this->connection->executeQuery(
 					'
-					insert into auth.recovery_requests (token, email, user_id)
+					insert into eauth.requests_to_recovery_access (token, email, user_id)
 						values (:token, :email, :userID)
 					',
 					[
@@ -327,7 +327,7 @@ class Auth implements AuthInterface {
 					]
 				);
 
-				return $this->getRecoveryRequestByToken($token);
+				return $this->getRequestToRecoveryAccessByToken($token);
 			});
 
 			return $request;
@@ -341,46 +341,46 @@ class Auth implements AuthInterface {
 	/**
 	 * {@inheritdoc}
 	 */
-	public function recovery(RecoveryRequest $recoveryRequest, string $newPassword): User {
+	public function recovery(RequestToRecoveryAccess $requestToRecoveryAccess, string $newPassword): User {
 
-		if ($recoveryRequest->isActivated()) {
+		if ($requestToRecoveryAccess->isActivated()) {
 			throw new RequestActivatedException();
 		}
 
-		if ($recoveryRequest->isExpired()) {
+		if ($requestToRecoveryAccess->isExpired()) {
 			throw new RequestExpiredException();
 		}
 
-		if ($recoveryRequest->getUser()->isLocked()) {
+		if ($requestToRecoveryAccess->getUser()->isLocked()) {
 			throw new UserLockedException();
 		}
 
 		try {
 
-			$this->connection->transactional(function () use ($recoveryRequest, $newPassword) {
+			$this->connection->transactional(function () use ($requestToRecoveryAccess, $newPassword) {
 
 				$this->connection->executeQuery(
 					'
-					update auth.recovery_requests set activated = now() where id = :id
+					update eauth.requests_to_recovery_access set activated = now() where id = :id
 					',
 					[
-						'id' => $recoveryRequest->getID(),
+						'id' => $requestToRecoveryAccess->getID(),
 					]
 				);
 
 				$this->connection->executeQuery(
 					'
-					update auth.users set password = :newPassword where id = :id
+					update eauth.users set password = :newPassword where id = :id
 					',
 					[
 						'newPassword' => $newPassword,
-						'id' => $recoveryRequest->getUser()->getID(),
+						'id' => $requestToRecoveryAccess->getUser()->getID(),
 					]
 				);
 
 			});
 
-			return $this->getUserByID($recoveryRequest->getUser()->getID());
+			return $this->getUserByID($requestToRecoveryAccess->getUser()->getID());
 
 		} catch (Exception $ex) {
 
@@ -400,7 +400,7 @@ class Auth implements AuthInterface {
 			$invites = $this->connection->fetchAll(
 				'
 				select *
-				from auth.invites
+				from eauth.invites
 				where inviter_user_id = :userID
 				',
 				[
@@ -434,7 +434,7 @@ class Auth implements AuthInterface {
 			$users = $this->connection->fetchAll(
 				'
 				select u.*
-				from auth.invites i, auth.users u
+				from eauth.invites i, eauth.users u
 				where i.inviter_user_id = :userID
 					and i.id = u.invite_id
 				',
@@ -467,7 +467,7 @@ class Auth implements AuthInterface {
 			$inviterID = $this->connection->fetchColumn(
 				'
 				select i.inviter_user_id
-				from auth.users u, auth.invites i
+				from eauth.users u, eauth.invites i
 				where u.invite_id = i.id
 				and u.id = :userID
 				',
@@ -487,7 +487,7 @@ class Auth implements AuthInterface {
 	/**
 	 * {@inheritdoc}
 	 */
-	public function getChangeEmailRequest(User $user, string $newEmail): ChangeEmailRequest {
+	public function getRequestToChangeEmail(User $user, string $newEmail): RequestToChangeEmail {
 
 		$newEmail = strtolower(trim($newEmail));
 
@@ -511,7 +511,7 @@ class Auth implements AuthInterface {
 
 				$numAttempts = $this->connection->fetchColumn(
 					'
-					select count(*) from auth.change_email_requests where user_id = :userID and now() < expired and activated is null
+					select count(*) from eauth.requests_to_change_email where user_id = :userID and now() < expired and activated is null
 					',
 					[
 						'userID' => $user->getID()
@@ -526,7 +526,7 @@ class Auth implements AuthInterface {
 					$token = $this->tokenGen->generateToken();
 					$id = $this->connection->fetchColumn(
 						'
-						select id from auth.change_email_requests where token = :token limit 1
+						select id from eauth.requests_to_change_email where token = :token limit 1
 						',
 						[
 							'token' => $token
@@ -539,7 +539,7 @@ class Auth implements AuthInterface {
 
 				$this->connection->executeQuery(
 					'
-					insert into auth.change_email_requests (token, email, user_id)
+					insert into eauth.requests_to_change_email (token, email, user_id)
 						values (:token, :newEmail, :userID)
 					',
 					[
@@ -549,7 +549,7 @@ class Auth implements AuthInterface {
 					]
 				);
 
-				return $this->getChangeEmailRequestByToken($token);
+				return $this->getRequestToChangeEmailByToken($token);
 			});
 
 			return $request;
@@ -563,22 +563,22 @@ class Auth implements AuthInterface {
 	/**
 	 * {@inheritdoc}
 	 */
-	public function changeEmail(ChangeEmailRequest $changeEmailRequest): User {
+	public function changeEmail(RequestToChangeEmail $requestToChangeEmail): User {
 
-		if ($changeEmailRequest->isActivated()) {
+		if ($requestToChangeEmail->isActivated()) {
 			throw new RequestActivatedException();
 		}
 
-		if ($changeEmailRequest->isExpired()) {
+		if ($requestToChangeEmail->isExpired()) {
 			throw new RequestExpiredException();
 		}
 
-		if ($changeEmailRequest->getUser()->isLocked()) {
+		if ($requestToChangeEmail->getUser()->isLocked()) {
 			throw new UserLockedException();
 		}
 
 		try {
-			$anotherUser = $this->getUserByEmail($changeEmailRequest->getEmail());
+			$anotherUser = $this->getUserByEmail($requestToChangeEmail->getEmail());
 		} catch (Exception $ex) {
 			$anotherUser = null;
 		}
@@ -589,30 +589,30 @@ class Auth implements AuthInterface {
 
 		try {
 
-			$this->connection->transactional(function () use ($changeEmailRequest) {
+			$this->connection->transactional(function () use ($requestToChangeEmail) {
 
 				$this->connection->executeQuery(
 					'
-					update auth.change_email_requests set activated = now() where id = :id
+					update eauth.requests_to_change_email set activated = now() where id = :id
 					',
 					[
-						'id' => $changeEmailRequest->getID(),
+						'id' => $requestToChangeEmail->getID(),
 					]
 				);
 
 				$this->connection->executeQuery(
 					'
-					update auth.users set email = :newEmail where id = :id
+					update eauth.users set email = :newEmail where id = :id
 					',
 					[
-						'newEmail' => $changeEmailRequest->getEmail(),
-						'id' => $changeEmailRequest->getUser()->getID(),
+						'newEmail' => $requestToChangeEmail->getEmail(),
+						'id' => $requestToChangeEmail->getUser()->getID(),
 					]
 				);
 
 			});
 
-			return $this->getUserByID($changeEmailRequest->getUser()->getID());
+			return $this->getUserByID($requestToChangeEmail->getUser()->getID());
 
 		} catch (Exception $ex) {
 
@@ -631,7 +631,7 @@ class Auth implements AuthInterface {
 
 			$row = $this->connection->fetchAssoc(
 				'
-				select * from auth.users where email = :email limit 1
+				select * from eauth.users where email = :email limit 1
 				',
 				[
 					'email' => $email,
@@ -659,7 +659,7 @@ class Auth implements AuthInterface {
 
 			$row = $this->connection->fetchAssoc(
 				'
-				select * from auth.users where id = :id limit 1
+				select * from eauth.users where id = :id limit 1
 				',
 				[
 					'id' => $id
@@ -687,7 +687,7 @@ class Auth implements AuthInterface {
 
 			$row = $this->connection->fetchAssoc(
 				'
-				select * from auth.invites where token = :token limit 1
+				select * from eauth.invites where token = :token limit 1
 				',
 				[
 					'token' => $token
@@ -712,13 +712,13 @@ class Auth implements AuthInterface {
 	/**
 	 * {@inheritdoc}
 	 */
-	public function getRecoveryRequestByToken(string $token): RecoveryRequest {
+	public function getRequestToRecoveryAccessByToken(string $token): RequestToRecoveryAccess {
 
 		try {
 
 			$row = $this->connection->fetchAssoc(
 				'
-				select * from auth.recovery_requests where token = :token limit 1
+				select * from eauth.requests_to_recovery_access where token = :token limit 1
 				',
 				[
 					'token' => $token
@@ -732,7 +732,7 @@ class Auth implements AuthInterface {
 
 		if ($row) {
 			$user = $this->getUserByID($row['user_id']);
-			return new RecoveryRequest($row['id'], $row['email'], $row['token'], $user, $row['created'], $row['expired'], $row['activated']);
+			return new RequestToRecoveryAccess($row['id'], $row['email'], $row['token'], $user, $row['created'], $row['expired'], $row['activated']);
 		}
 
 		throw new TokenNotFoundException("Token is not found: {$token}.");
@@ -741,13 +741,13 @@ class Auth implements AuthInterface {
 	/**
 	 * {@inheritdoc}
 	 */
-	public function getChangeEmailRequestByToken(string $token): ChangeEmailRequest {
+	public function getRequestToChangeEmailByToken(string $token): RequestToChangeEmail {
 
 		try {
 
 			$row = $this->connection->fetchAssoc(
 				'
-				select * from auth.change_email_requests where token = :token limit 1
+				select * from eauth.requests_to_change_email where token = :token limit 1
 				',
 				[
 					'token' => $token
@@ -761,7 +761,7 @@ class Auth implements AuthInterface {
 
 		if ($row) {
 			$user = $this->getUserByID($row['user_id']);
-			return new ChangeEmailRequest($row['id'], $row['email'], $row['token'], $user, $row['created'], $row['expired'], $row['activated']);
+			return new RequestToChangeEmail($row['id'], $row['email'], $row['token'], $user, $row['created'], $row['expired'], $row['activated']);
 		}
 
 		throw new TokenNotFoundException("Token is not found: {$token}.");

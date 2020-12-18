@@ -2,23 +2,23 @@
 
 namespace EAuth;
 
-use \EAuth\BasicRequest;
+use \EAuth\Request;
 use \DateTime;
 
 /**
- * Describe the class which provides all features for recovery request.
+ * Describe the class which provides all features for change email request.
  */
-class RecoveryRequest extends BasicRequest {
+class RequestToChangeEmail extends Request {
 
 	private $user;
 
 	/**
-	 * Create recovery request object.
+	 * Create change email request object.
 	 *
 	 * @param mixed $id The unique ID of request.
-	 * @param string $email The email address of user.
+	 * @param string $email The new email address of user.
 	 * @param string $token The token of request.
-	 * @param \EAuth\User $user The user who make a request.
+	 * @param \EAuth\User $user User who want to change email.
 	 * @param string $created Date and time of creation of the request.
 	 * @param string $exired Expiration date and time.
 	 * @param string|null $activated Date and time of activation of the request or null if the request is not activated.
@@ -29,11 +29,11 @@ class RecoveryRequest extends BasicRequest {
 	}
 
 	/**
-	 * Get user account.
+	 * Get user who want to change email.
 	 *
-	 * @return \EAuth\User The user's account object.
+	 * @return \EAuth\User User's account.
 	 */
-	public function getUser(): ?User {
+	public function getUser(): User {
 		return $this->user;
 	}
 }

@@ -1,10 +1,10 @@
-CREATE SCHEMA IF NOT EXISTS auth;
+CREATE SCHEMA IF NOT EXISTS eauth;
 
 --
 -- Table users
 --
 
-CREATE TABLE IF NOT EXISTS auth.users (
+CREATE TABLE IF NOT EXISTS eauth.users (
   id bigserial NOT NULL,
   email text NOT NULL,
   password text NOT NULL,
@@ -16,17 +16,17 @@ CREATE TABLE IF NOT EXISTS auth.users (
 );
 
 CREATE INDEX users_email_idx
-  ON auth.users
+  ON eauth.users
   USING btree
   (email);
 
 CREATE INDEX users_locked_idx
-  ON auth.users
+  ON eauth.users
   USING btree
   (locked);
 
 CREATE INDEX users_invite_id_idx
-  ON auth.users
+  ON eauth.users
   USING btree
   (invite_id);
 
@@ -34,7 +34,7 @@ CREATE INDEX users_invite_id_idx
 -- Table invites
 --
 
-CREATE TABLE IF NOT EXISTS auth.invites
+CREATE TABLE IF NOT EXISTS eauth.invites
 (
   id bigserial NOT NULL,
   email text NOT NULL,
@@ -48,30 +48,30 @@ CREATE TABLE IF NOT EXISTS auth.invites
 );
 
 CREATE INDEX invites_email_idx
-  ON auth.invites
+  ON eauth.invites
   USING btree
   (email);
 
 CREATE INDEX invites_token_idx
-  ON auth.invites
+  ON eauth.invites
   USING btree
   (token);
 
 CREATE INDEX invites_inviter_user_id_idx
-  ON auth.invites
+  ON eauth.invites
   USING btree
   (inviter_user_id);
 
 CREATE INDEX invites_expired_idx
-  ON auth.invites
+  ON eauth.invites
   USING btree
   (expired);
 
 --
--- Table recovery_requests
+-- Table requests_to_recovery_access
 --
 
-CREATE TABLE IF NOT EXISTS auth.recovery_requests
+CREATE TABLE IF NOT EXISTS eauth.requests_to_recovery_access
 (
   id bigserial NOT NULL,
   email text NOT NULL,
@@ -80,35 +80,35 @@ CREATE TABLE IF NOT EXISTS auth.recovery_requests
   expired timestamp with time zone NOT NULL DEFAULT (now() + '24 hours'::interval),
   activated timestamp with time zone,
   user_id bigint not null,
-  CONSTRAINT recovery_requests_pkey PRIMARY KEY (id),
-  CONSTRAINT recovery_requests_token_uniq UNIQUE (token)
+  CONSTRAINT requests_to_recovery_access_pkey PRIMARY KEY (id),
+  CONSTRAINT requests_to_recovery_access_token_uniq UNIQUE (token)
 );
 
-CREATE INDEX recovery_requests_email_idx
-  ON auth.recovery_requests
+CREATE INDEX requests_to_recovery_access_email_idx
+  ON eauth.requests_to_recovery_access
   USING btree
   (email);
 
-CREATE INDEX recovery_requests_token_idx
-  ON auth.recovery_requests
+CREATE INDEX requests_to_recovery_access_token_idx
+  ON eauth.requests_to_recovery_access
   USING btree
   (token);
 
-CREATE INDEX recovery_requests_expired_idx
-  ON auth.recovery_requests
+CREATE INDEX requests_to_recovery_access_expired_idx
+  ON eauth.requests_to_recovery_access
   USING btree
   (expired);
 
-CREATE INDEX recovery_requests_user_id_idx
-  ON auth.recovery_requests
+CREATE INDEX requests_to_recovery_access_user_id_idx
+  ON eauth.requests_to_recovery_access
   USING btree
   (user_id);
 
 --
--- Table change_email_requests
+-- Table requests_to_change_email
 --
 
-CREATE TABLE IF NOT EXISTS auth.change_email_requests
+CREATE TABLE IF NOT EXISTS eauth.requests_to_change_email
 (
   id bigserial NOT NULL,
   email text NOT NULL,
@@ -117,27 +117,27 @@ CREATE TABLE IF NOT EXISTS auth.change_email_requests
   expired timestamp with time zone NOT NULL DEFAULT (now() + '24 hours'::interval),
   activated timestamp with time zone,
   user_id bigint not null,
-  CONSTRAINT change_email_requests_pkey PRIMARY KEY (id),
-  CONSTRAINT change_email_requests_token_uniq UNIQUE (token)
+  CONSTRAINT requests_to_change_email_pkey PRIMARY KEY (id),
+  CONSTRAINT requests_to_change_email_token_uniq UNIQUE (token)
 );
 
-CREATE INDEX change_email_requests_email_idx
-  ON auth.change_email_requests
+CREATE INDEX requests_to_change_email_email_idx
+  ON eauth.requests_to_change_email
   USING btree
   (email);
 
-CREATE INDEX change_email_requests_token_idx
-  ON auth.change_email_requests
+CREATE INDEX requests_to_change_email_token_idx
+  ON eauth.requests_to_change_email
   USING btree
   (token);
 
-CREATE INDEX change_email_requests_expired_idx
-  ON auth.change_email_requests
+CREATE INDEX requests_to_change_email_expired_idx
+  ON eauth.requests_to_change_email
   USING btree
   (expired);
 
-CREATE INDEX change_email_requests_user_id_idx
-  ON auth.change_email_requests
+CREATE INDEX requests_to_change_email_user_id_idx
+  ON eauth.requests_to_change_email
   USING btree
   (user_id);
 
@@ -145,22 +145,22 @@ CREATE INDEX change_email_requests_user_id_idx
 -- All foreign keys
 --
 
-alter table auth.users
+alter table eauth.users
 	add CONSTRAINT users_invite_id_fkey FOREIGN KEY (invite_id)
-	REFERENCES auth.invites (id) MATCH SIMPLE
+	REFERENCES eauth.invites (id) MATCH SIMPLE
 	ON UPDATE CASCADE ON DELETE CASCADE;
 
-alter table auth.invites
+alter table eauth.invites
 	add CONSTRAINT invites_inviter_user_id_fkey FOREIGN KEY (inviter_user_id)
-	REFERENCES auth.users (id) MATCH SIMPLE
+	REFERENCES eauth.users (id) MATCH SIMPLE
 	ON UPDATE CASCADE ON DELETE CASCADE;
 
-alter table auth.recovery_requests
-	add CONSTRAINT recovery_requests_user_id_fkey FOREIGN KEY (user_id)
-	REFERENCES auth.users (id) MATCH SIMPLE
+alter table eauth.requests_to_recovery_access
+	add CONSTRAINT requests_to_recovery_access_user_id_fkey FOREIGN KEY (user_id)
+	REFERENCES eauth.users (id) MATCH SIMPLE
 	ON UPDATE CASCADE ON DELETE CASCADE;
 
-alter table auth.change_email_requests
-	add CONSTRAINT change_email_requests_user_id_fkey FOREIGN KEY (user_id)
-	REFERENCES auth.users (id) MATCH SIMPLE
+alter table eauth.requests_to_change_email
+	add CONSTRAINT requests_to_change_email_user_id_fkey FOREIGN KEY (user_id)
+	REFERENCES eauth.users (id) MATCH SIMPLE
 	ON UPDATE CASCADE ON DELETE CASCADE;

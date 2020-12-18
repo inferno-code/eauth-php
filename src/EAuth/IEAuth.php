@@ -4,13 +4,13 @@ namespace EAuth;
 
 use \EAuth\User;
 use \EAuth\Invite;
-use \EAuth\RecoveryRequest;
-use \EAuth\ChangeEmailRequest;
+use \EAuth\RequestToRecoveryAccess;
+use \EAuth\RequestChangeEmail;
 
 /**
  * Describe the interface which provides all features and utilities for secure authentication of individual users.
  */
-interface AuthInterface {
+interface IEAuth {
 
 	/**
 	 * Generate new invite for unregistered user.
@@ -97,7 +97,7 @@ interface AuthInterface {
 	 *
 	 * @param string $email Email address of user which lose an access.
 	 *
-	 * @return \EAuth\RecoveryRequest An instance of request.
+	 * @return \EAuth\RequestToRecoveryAccess An instance of request.
 	 *
 	 * @throws \EAuth\Exceptions\UserLockedException If users's account is locked.
 	 * @throws \EAuth\Exceptions\TooManyRequestsException If the number of allowed attempts/requests has been exceeded.
@@ -105,12 +105,12 @@ interface AuthInterface {
 	 * @throws \EAuth\Exceptions\UserNotFoundException If the user is not found in storage.
 	 * @throws \EAuth\Exceptions\IOException If storage is not accessible.
 	 */
-	public function getRecoveryRequest(string $email): RecoveryRequest;
+	public function getRequestToRecoveryAccess(string $email): RequestToRecoveryAccess;
 
 	/**
 	 * Recovery access using a token from the request.
 	 *
-	 * @param \EAuth\RecoveryRequest $recoveryRequest An instance of request.
+	 * @param \EAuth\RequestToRecoveryAccess $requestToRecoveryAccees An instance of request.
 	 * @param string $newPassword The user's new password.
 	 *
 	 * @return \EAuth\User An instance of updated user's account.
@@ -121,7 +121,7 @@ interface AuthInterface {
 	 * @throws \EAuth\Exceptions\UserNotFoundException If the user is not found in storage.
 	 * @throws \EAuth\Exceptions\IOException If storage is not accessible.
 	 */
-	public function recovery(RecoveryRequest $recoveryRequest, string $newPassword): User;
+	public function recovery(RequestToRecoveryAccess $requestToRecoveryAccees, string $newPassword): User;
 
 	/**
 	 * Get list of all invites created by user.
@@ -163,7 +163,7 @@ interface AuthInterface {
 	 * @param \EAuth\User $user User's account.
 	 * @param string $newEmail New email address of user.
 	 *
-	 * @return \EAuth\ChangeEmailRequest An instance of request.
+	 * @return \EAuth\RequestToChangeEmail An instance of request.
 	 *
 	 * @throws \EAuth\Exceptions\UserLockedException If users's account is locked.
 	 * @throws \EAuth\Exceptions\UserAlreadyExistsException If a new email is already registered in storage.
@@ -172,12 +172,12 @@ interface AuthInterface {
 	 * @throws \EAuth\Exceptions\UserNotFoundException If the user is not found in storage.
 	 * @throws \EAuth\Exceptions\IOException If storage is not accessible.
 	 */
-	public function getChangeEmailRequest(User $user, string $newEmail): ChangeEmailRequest;
+	public function getRequestToChangeEmail(User $user, string $newEmail): RequestToChangeEmail;
 
 	/**
 	 * Changing user's email to new confirmed by token from the request.
 	 *
-	 * @param \EAuth\ChangeEmailRequest $changeEmailRequest An instance of request.
+	 * @param \EAuth\RequestToChangeEmail $requestToChangeEmail An instance of request.
 	 *
 	 * @return \EAuth\User An instance of updated user's account.
 	 *
@@ -188,7 +188,7 @@ interface AuthInterface {
 	 * @throws \EAuth\Exceptions\UserNotFoundException If the user is not found in storage.
 	 * @throws \EAuth\Exceptions\IOException If storage is not accessible.
 	 */
-	public function changeEmail(ChangeEmailRequest $changeEmailRequest): User;
+	public function changeEmail(RequestToChangeEmail $requestToChangeEmail): User;
 
 	/**
 	 * Get user's account by given email.
@@ -228,29 +228,29 @@ interface AuthInterface {
 	public function getInviteByToken(string $token): Invite;
 
 	/**
-	 * Get recovery request by given token.
+	 * Get request to recovery access by given token.
 	 *
 	 * @param string $token The unique token.
 	 *
-	 * @return \EAuth\RecoveryRequest Recovery request object.
+	 * @return \EAuth\RequestToRecoveryAccess An instance of request to recovery access.
 	 *
 	 * @throws \EAuth\Exceptions\TokenNotFoundException If the token is not found in storage.
 	 * @throws \EAuth\Exceptions\UserNotFoundException If the user is not found in storage.
 	 * @throws \EAuth\Exceptions\IOException If storage is not accessible.
 	 */
-	public function getRecoveryRequestByToken(string $token): RecoveryRequest;
+	public function getRequestToRecoveryAccessByToken(string $token): RequestToRecoveryAccess;
 
 	/**
-	 * Get change email request by given token.
+	 * Get request to change email by given token.
 	 *
 	 * @param string $token The unique token.
 	 *
-	 * @return \EAuth\ChangeEmailRequest Change email request object.
+	 * @return \EAuth\RequestToChangeEmail An instance of request to Change email.
 	 *
 	 * @throws \EAuth\Exceptions\TokenNotFoundException If the token is not found in storage.
 	 * @throws \EAuth\Exceptions\UserNotFoundException If the user is not found in storage.
 	 * @throws \EAuth\Exceptions\IOException If storage is not accessible.
 	 */
-	public function getChangeEmailRequestByToken(string $token): ChangeEmailRequest;
+	public function getRequestToChangeEmailByToken(string $token): RequestToChangeEmail;
 
 }

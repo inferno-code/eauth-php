@@ -2,7 +2,7 @@
 
 namespace EAuth;
 
-use \EAuth\TokenGeneratorInterface;
+use \EAuth\ITokenGenerator;
 
 use \InvalidArgumentException;
 
@@ -12,9 +12,9 @@ use function preg_match;
 use function sprintf;
 
 /**
- * Basic implementation of interface TokenGeneratorInterface.
+ * Basic implementation of interface ITokenGenerator.
  */
-class BasicTokenGenerator implements TokenGeneratorInterface {
+class BasicTokenGenerator implements ITokenGenerator {
 	
 	private $length;
 	

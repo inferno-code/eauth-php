@@ -3,9 +3,9 @@
 namespace EAuth;
 
 /**
- * Describe the interface for token generation and validation.
+ * Describe an interface for token generation and validation.
  */
-interface TokenGeneratorInterface {
+interface ITokenGenerator {
 
 	/**
 	 * Generate new access token.

@@ -7,7 +7,7 @@ use \DateTime;
 /**
  * Describe the class which provides basic features for user's requests.
  */
-class BasicRequest {
+class Request {
 
 	private $id;
 	private $email;

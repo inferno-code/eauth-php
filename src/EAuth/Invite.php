@@ -2,14 +2,14 @@
 
 namespace EAuth;
 
-use \EAuth\BasicRequest;
+use \EAuth\Request;
 use \EAuth\User;
 use \DateTime;
 
 /**
  * Describe the class which provides all features for invite.
  */
-class Invite extends BasicRequest {
+class Invite extends Request {
 
 	private $inviter;
 

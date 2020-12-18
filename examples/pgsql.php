@@ -2,12 +2,12 @@
 
 require __DIR__ . '/../vendor/autoload.php';
 
-use \EAuth\Doctrine\Auth;
-use \EAuth\AuthInterface;
+use \EAuth\IEAuth;
+use \EAuth\EAuthPostgres;
 use \EAuth\User;
 use \EAuth\Invite;
-use \EAuth\RecoveryRequest;
-use \EAuth\ChangeEmailRequest;
+use \EAuth\RequestToRecoveryAccess;
+use \EAuth\RequestToChangeEmail;
 use \EAuth\Exceptions\IOException;
 use \EAuth\Exceptions\PasswordNotMatchException;
 use \EAuth\Exceptions\TooManyRequestsException;
@@ -17,14 +17,14 @@ use \EAuth\Exceptions\UserNotFoundException;
 use \EAuth\Exceptions\TokenNotFoundException;
 use \EAuth\Exceptions\RequestExpiredException;
 use \EAuth\Exceptions\RequestActivatedException;
-use \EAuth\TokenGeneratorInterface;
+use \EAuth\ITokenGenerator;
 use \EAuth\BasicTokenGenerator;
 use \Doctrine\DBAL\Connection;
 
 $dbConfig = [
 	'host' => '127.0.0.1',
 	'port' => '5432',
-	'dbname' => 'emailauth',
+	'dbname' => 'eauth',
 	'user' => 'postgres',
 	'password' => '54321',
 	'driver' => 'pdo_pgsql',
@@ -55,7 +55,7 @@ $queryBuilder
 var_dump($queryBuilder->getSQL());exit;
 */
 
-$auth = new Auth($conn, new BasicTokenGenerator());
+$auth = new EAuthPostgres($conn, new BasicTokenGenerator());
 
 /*
 try {
