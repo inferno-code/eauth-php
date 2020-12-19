@@ -173,8 +173,8 @@ try {
 
 /*
 try {
-    $recoveryRequest = $auth->getRecoveryRequest('test@test');
-	var_dump($recoveryRequest);
+    $requestToRecoveryAccess = $auth->getRequestToRecoveryAccess('test@test');
+	var_dump($requestToRecoveryAccess);
 } catch (UserNotFoundException $ex) {
 	print "User is not found\n";
 } catch (UserLockedException $ex) {
@@ -190,8 +190,8 @@ try {
 
 /*
 try {
-    $recoveryRequest = $auth->getRecoveryRequestByToken('372a004464335233d4a1d01c49d97b6c');
-    $user = $auth->recovery($recoveryRequest, 'test');
+    $requestToRecoveryAccess = $auth->getRequestToRecoveryAccessByToken('372a004464335233d4a1d01c49d97b6c');
+    $user = $auth->recovery($requestToRecoveryAccess, 'test');
 	var_dump($user);
 } catch (RequestExpiredException $ex) {
 	print "Request is expired\n";
@@ -215,8 +215,8 @@ try {
 /*
 try {
 	$user = $auth->getUserByEmail('test@test');
-    $changeEmailRequest = $auth->getChangeEmailRequest($user, 'john@connor.gov');
-	var_dump($changeEmailRequest);
+    $requestToChangeEmail = $auth->getRequestToChangeEmail($user, 'john@connor.gov');
+	var_dump($requestToChangeEmail);
 } catch (UserNotFoundException $ex) {
 	print "User is not found\n";
 } catch (UserAlreadyExistsException $ex) {
@@ -234,8 +234,8 @@ try {
 
 /*
 try {
-    $changeEmailRequest = $auth->getChangeEmailRequestByToken('51df5c903a332dab7743a4f7b12ff17d');
-    $user = $auth->changeEmail($changeEmailRequest);
+    $requestToChangeEmail = $auth->getRequestToChangeEmailByToken('51df5c903a332dab7743a4f7b12ff17d');
+    $user = $auth->changeEmail($requestToChangeEmail);
 	var_dump($user);
 } catch (RequestExpiredException $ex) {
 	print "Request is expired\n";
